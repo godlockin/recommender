@@ -1,0 +1,109 @@
+19:15:39.546 [[1;33mmain[0;39m] [31mWARN [0;39m [1;32mo.s.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext[0;39m - [31mException encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'controller': Injection of resource dependencies failed; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'predictServiceImpl': Unsatisfied dependency expressed through field 'predictServiceMap'; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'atLCAlsPredictServiceImpl': Unsatisfied dependency expressed through field 'predictors'; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'java.util.Map<java.lang.String, com.st.recommender.service.als.AlsPredictService>' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}[0;39m 
+19:15:39.568 [[1;33mmain[0;39m] [1;31mERROR[0;39m [1;32morg.springframework.boot.diagnostics.LoggingFailureAnalysisReporter[0;39m - [1;31m
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Field predictors in com.st.recommender.service.als.AlsPredictServiceImpl required a bean of type 'java.util.Map' that could not be found.
+
+The injection point has the following annotations:
+	- @org.springframework.beans.factory.annotation.Autowired(required=true)
+
+
+Action:
+
+Consider defining a bean of type 'java.util.Map' in your configuration.
+[0;39m 
+19:16:06.372 [[1;33mmain[0;39m] [31mWARN [0;39m [1;32mo.s.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext[0;39m - [31mException encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'controller': Injection of resource dependencies failed; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'predictServiceImpl': Unsatisfied dependency expressed through field 'predictServiceMap'; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'atLCAlsPredictServiceImpl': Unsatisfied dependency expressed through field 'predictors'; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'java.util.Map<java.lang.String, com.st.recommender.service.als.AlsPredictService>' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}[0;39m 
+19:16:06.640 [[1;33mmain[0;39m] [1;31mERROR[0;39m [1;32morg.springframework.boot.diagnostics.LoggingFailureAnalysisReporter[0;39m - [1;31m
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Field predictors in com.st.recommender.service.als.AlsPredictServiceImpl required a bean of type 'java.util.Map' that could not be found.
+
+The injection point has the following annotations:
+	- @org.springframework.beans.factory.annotation.Autowired(required=true)
+
+
+Action:
+
+Consider defining a bean of type 'java.util.Map' in your configuration.
+[0;39m 
+19:19:24.402 [[1;33mmain[0;39m] [31mWARN [0;39m [1;32mo.s.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext[0;39m - [31mException encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'controller': Injection of resource dependencies failed; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'predictServiceImpl': Unsatisfied dependency expressed through field 'predictServiceMap'; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'atLCAlsPredictServiceImpl': Unsatisfied dependency expressed through field 'predictors'; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'java.util.Map<java.lang.String, com.st.recommender.service.als.AlsPredictService>' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}[0;39m 
+19:19:24.427 [[1;33mmain[0;39m] [1;31mERROR[0;39m [1;32morg.springframework.boot.diagnostics.LoggingFailureAnalysisReporter[0;39m - [1;31m
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Field predictors in com.st.recommender.service.als.AlsPredictServiceImpl required a bean of type 'java.util.Map' that could not be found.
+
+The injection point has the following annotations:
+	- @org.springframework.beans.factory.annotation.Autowired(required=true)
+
+
+Action:
+
+Consider defining a bean of type 'java.util.Map' in your configuration.
+[0;39m 
+19:20:18.011 [[1;33mmain[0;39m] [31mWARN [0;39m [1;32mo.s.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext[0;39m - [31mException encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'controller': Injection of resource dependencies failed; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'predictServiceImpl': Unsatisfied dependency expressed through field 'predictServiceMap'; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'atLCAlsPredictServiceImpl': Unsatisfied dependency expressed through field 'predictors'; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'java.util.Map<java.lang.String, com.st.recommender.service.als.AlsPredictService>' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {@org.springframework.beans.factory.annotation.Autowired(required=true)}[0;39m 
+19:20:18.033 [[1;33mmain[0;39m] [1;31mERROR[0;39m [1;32morg.springframework.boot.diagnostics.LoggingFailureAnalysisReporter[0;39m - [1;31m
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Field predictors in com.st.recommender.service.als.AlsPredictServiceImpl required a bean of type 'java.util.Map' that could not be found.
+
+The injection point has the following annotations:
+	- @org.springframework.beans.factory.annotation.Autowired(required=true)
+
+
+Action:
+
+Consider defining a bean of type 'java.util.Map' in your configuration.
+[0;39m 
+19:46:26.418 [[1;33mhttp-nio-8080-exec-2[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+19:46:48.164 [[1;33mhttp-nio-8080-exec-3[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+19:47:05.803 [[1;33mhttp-nio-8080-exec-4[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+19:47:23.046 [[1;33mhttp-nio-8080-exec-1[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+19:50:58.524 [[1;33mmain[0;39m] [31mWARN [0;39m [1;32mo.s.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext[0;39m - [31mException encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'; nested exception is org.springframework.boot.web.server.PortInUseException: Port 8080 is already in use[0;39m 
+19:50:58.566 [[1;33mmain[0;39m] [1;31mERROR[0;39m [1;32morg.springframework.boot.diagnostics.LoggingFailureAnalysisReporter[0;39m - [1;31m
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+[0;39m 
+19:59:57.117 [[1;33mhttp-nio-8080-exec-1[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:01:24.064 [[1;33mhttp-nio-8080-exec-3[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:02:01.756 [[1;33mhttp-nio-8080-exec-4[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:04:19.512 [[1;33mhttp-nio-8080-exec-2[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:05:14.200 [[1;33mhttp-nio-8080-exec-1[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:07:02.311 [[1;33mhttp-nio-8080-exec-3[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:08:16.840 [[1;33mhttp-nio-8080-exec-1[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:09:03.099 [[1;33mhttp-nio-8080-exec-1[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:09:43.388 [[1;33mhttp-nio-8080-exec-3[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:11:35.129 [[1;33mhttp-nio-8080-exec-4[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:12:57.026 [[1;33mhttp-nio-8080-exec-2[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:14:45.266 [[1;33mhttp-nio-8080-exec-3[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:16:47.684 [[1;33mhttp-nio-8080-exec-4[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
+20:19:20.248 [[1;33mhttp-nio-8080-exec-2[0;39m] [1;31mERROR[0;39m [1;32mcom.st.recommender.common.CommonExceptionHandler[0;39m - [1;31mError happened on url:[/predict][0;39m 
