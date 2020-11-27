@@ -27,6 +27,7 @@ public class CommonExceptionHandler {
     @ResponseBody
     public <T> ResponseEntity<ResponseWrapper<T>> exceptionHandle(HttpServletRequest request, Exception e, HandlerMethod handlerMethod) {
         e.printStackTrace();
+
         log.error("Error happened on url:[{}]", request.getRequestURI());
         ResponseEntity.BodyBuilder bodyBuilder = ResponseEntity.status(HttpStatus.OK);
         String errMsg = "调用【" + handlerMethod.getMethod().getName() + "]时";
@@ -41,7 +42,10 @@ public class CommonExceptionHandler {
             errMsg += buildErrMsgByBindingError(be.getAllErrors());
         } else if (e instanceof HttpMessageNotReadableException) {
             errMsg += "参数校验失败：requestBody 不存在";
+        } else {
+            errMsg += e.getMessage();
         }
+
         return bodyBuilder.body(ResponseWrapper.failure(0, errMsg));
     }
 

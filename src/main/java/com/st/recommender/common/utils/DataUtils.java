@@ -1,15 +1,33 @@
 package com.st.recommender.common.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Slf4j
 public class DataUtils {
+
+    public static boolean isAllCollectionsEmpty(Collection...collections) {
+        return isAllCollectionMatch(Stream.of(collections), CollectionUtils::isEmpty);
+    }
+
+    public static boolean isAnyCollectionEmpty(Collection...collections) {
+        return isAnyCollectionMatch(Stream.of(collections), CollectionUtils::isEmpty);
+    }
+
+    public static boolean isAllCollectionMatch(Stream<Collection> stream, Predicate<Collection> predicate) {
+        return stream.allMatch(predicate);
+    }
+
+    public static boolean isAnyCollectionMatch(Stream<Collection> stream, Predicate<Collection> predicate) {
+        return stream.anyMatch(predicate);
+    }
 
     public static <T> T getNotNullValue(Map base, String key, Class<T> clazz, Object defaultValue) {
         return handleNullValue(base.get(key), clazz, defaultValue);
