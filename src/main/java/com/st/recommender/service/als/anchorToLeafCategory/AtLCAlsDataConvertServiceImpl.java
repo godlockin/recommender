@@ -6,6 +6,7 @@ import com.st.recommender.model.opt.als.AnchorLeaf;
 import com.st.recommender.model.origin.Anchor;
 import com.st.recommender.model.origin.Live;
 import com.st.recommender.model.origin.Product;
+import com.st.recommender.service.DataConvertService;
 import com.st.recommender.service.abstractgroup.AbstractDataConvertServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class AtLCAlsDataConvertServiceImpl extends AbstractDataConvertServiceImpl<Map<Class, List>, List> {
+public class AtLCAlsDataConvertServiceImpl extends AbstractDataConvertServiceImpl<Map<Class, List>, List> implements DataConvertService<Map<Class, List>, List> {
 
     @Override
     protected Function<Map<Class, List>, List> dataConverter() {

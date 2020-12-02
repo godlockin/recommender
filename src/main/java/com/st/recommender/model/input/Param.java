@@ -15,6 +15,11 @@ public class Param {
     private Map<String, String> inputFilePath;
     private String outputFilePath;
 
+    private Integer parallel = 20;
+
+    private String similarityFunc = "EUCLIDEAN_DISTANCE";
+    private String normalizationFunc = "MAX_MIN_RANGE";
+    protected Double normRange = 100D;
     private Boolean selfDistinct = true;
     private Integer topN = 100;
     private Integer topSimilarity = 20;

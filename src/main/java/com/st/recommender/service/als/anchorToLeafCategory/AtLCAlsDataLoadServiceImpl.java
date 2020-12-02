@@ -32,10 +32,21 @@ public class AtLCAlsDataLoadServiceImpl extends AbstractDataLoadServiceImpl impl
     @Value("${ATLC_ALS_INPUT_COMBINE_PATH_KEY:anchorLeaf}")
     private String INPUT_ANCHOR_LEAF_PATH_KEY;
 
+    @Override
+    public AlgorithmEnum algorithm() { return AlgorithmEnum.ANCHOR_TO_LEAF_CATEGORY; }
+
+    protected String getInputAnchorLeafPathKey() { return INPUT_ANCHOR_LEAF_PATH_KEY; }
+
+    protected String getInputProductPathKey() { return INPUT_PRODUCT_PATH_KEY; }
+
+    protected String getInputAnchorPathKey() { return INPUT_ANCHOR_PATH_KEY; }
+
+    protected String getInputLivePathKey() { return INPUT_LIVE_PATH_KEY; }
+
     protected Function<Param, DataLoadTypeEnum> dataLoadTypeFinder() {
         return param -> {
             Map<String, String> inputMap = Optional.ofNullable(param.getInputFilePath()).orElse(new HashMap<>());
-            if (StringUtils.isNotBlank(inputMap.getOrDefault(INPUT_ANCHOR_LEAF_PATH_KEY, ""))) {
+            if (StringUtils.isNotBlank(inputMap.getOrDefault(getInputAnchorLeafPathKey(), ""))) {
                 return DataLoadTypeEnum.CSV;
             }
             return DataLoadTypeEnum.JSON;
@@ -45,10 +56,10 @@ public class AtLCAlsDataLoadServiceImpl extends AbstractDataLoadServiceImpl impl
     @Override
     protected Map<String, Class> pojoClass() {
         Map<String, Class> map = new HashMap<>();
-        map.put(INPUT_LIVE_PATH_KEY, Live.class);
-        map.put(INPUT_ANCHOR_PATH_KEY, Anchor.class);
-        map.put(INPUT_PRODUCT_PATH_KEY, Product.class);
-        map.put(INPUT_ANCHOR_LEAF_PATH_KEY, AnchorLeaf.class);
+        map.put(getInputLivePathKey(), Live.class);
+        map.put(getInputAnchorPathKey(), Anchor.class);
+        map.put(getInputProductPathKey(), Product.class);
+        map.put(getInputAnchorLeafPathKey(), AnchorLeaf.class);
         return map;
     }
 
@@ -65,13 +76,13 @@ public class AtLCAlsDataLoadServiceImpl extends AbstractDataLoadServiceImpl impl
                     .header(headerFinder().apply(param))
                     .build();
 
-            configMap.put(INPUT_ANCHOR_LEAF_PATH_KEY, config);
+            configMap.put(getInputAnchorLeafPathKey(), config);
             return configMap;
         };
     }
 
     protected Function<Param, List<String>> headerFinder() {
-        return p -> Arrays.asList("anchor_id"
+        return param -> Arrays.asList("anchor_id"
                 , "live_id"
                 , "item_id"
                 , "live_price"
@@ -108,15 +119,12 @@ public class AtLCAlsDataLoadServiceImpl extends AbstractDataLoadServiceImpl impl
         return param -> {
             Map<String, String> inputMap = Optional.ofNullable(param.getInputFilePath()).orElse(new HashMap<>());
             Map<String, String> map = new HashMap<>();
-            map.put(INPUT_LIVE_PATH_KEY, inputMap.get(INPUT_LIVE_PATH_KEY));
-            map.put(INPUT_ANCHOR_PATH_KEY, inputMap.get(INPUT_ANCHOR_PATH_KEY));
-            map.put(INPUT_PRODUCT_PATH_KEY, inputMap.get(INPUT_PRODUCT_PATH_KEY));
-            map.put(INPUT_ANCHOR_LEAF_PATH_KEY, inputMap.get(INPUT_ANCHOR_LEAF_PATH_KEY));
+            map.put(getInputLivePathKey(), inputMap.get(getInputLivePathKey()));
+            map.put(getInputAnchorPathKey(), inputMap.get(getInputAnchorPathKey()));
+            map.put(getInputProductPathKey(), inputMap.get(getInputProductPathKey()));
+            map.put(getInputAnchorLeafPathKey(), inputMap.get(getInputAnchorLeafPathKey()));
             return map;
         };
     }
-
-    @Override
-    public AlgorithmEnum algorithm() { return AlgorithmEnum.ANCHOR_TO_LEAF_CATEGORY; }
 
 }

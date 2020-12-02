@@ -1,13 +1,19 @@
 package com.st.recommender.service.als;
 
+import com.st.recommender.common.utils.DataUtils;
 import com.st.recommender.common.utils.TaskPool;
 import com.st.recommender.constants.AlgorithmEnum;
 import com.st.recommender.constants.BaseEnum;
 import com.st.recommender.constants.Constants.AlgorithmMapping;
+import com.st.recommender.constants.DistanceEnum;
+import com.st.recommender.constants.NormalizationEnum;
 import com.st.recommender.model.input.Param;
 import com.st.recommender.model.opt.als.ScoreModel;
 import com.st.recommender.service.*;
 import com.st.recommender.service.abstractgroup.AbstractPredictServiceImpl;
+import com.st.recommender.service.common.CommonFuncUtils;
+import com.st.recommender.service.common.DistanceFuncUtils;
+import com.st.recommender.service.common.NormalizeFuncUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.stereotype.Service;
@@ -20,8 +26,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 @Slf4j
 @Service
@@ -52,8 +59,8 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
         log.info("Got {} clean data", cleanData.size());
 
         List normalData = Optional.ofNullable(dataNormalizerMap.get(algorithm))
-                .flatMap(service -> Optional.ofNullable(service.normalize(cleanData))).orElse(new ArrayList());
-        if (CollectionUtils.isEmpty(cleanData)) {
+                .flatMap(service -> Optional.ofNullable(service.normalize(param, cleanData))).orElse(new ArrayList());
+        if (CollectionUtils.isEmpty(normalData)) {
             return "";
         }
 
@@ -70,11 +77,36 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
         return filePath;
     }
 
+    protected Function<Param, Integer> workParallel() {
+        return param -> Optional.ofNullable(param.getParallel()).orElse(20);
+    }
+
+    protected Function<Param, Integer> topNSimilar() {
+        return param -> Optional.ofNullable(param.getTopSimilarity()).orElse(20);
+    }
+
+    protected Function<Param, Integer> topNItem() {
+        return param -> Optional.ofNullable(param.getTopN()).orElse(100);
+    }
+
+    protected Function<Param, Boolean> selfDistinct() {
+        return param -> Optional.ofNullable(param.getSelfDistinct()).orElse(true);
+    }
+
+    protected Function<Param, BiFunction<double[], double[], Double>> similarityCalc() {
+        return param -> DistanceFuncUtils.findSimilarityFunc(DistanceEnum.valueOf(param.getSimilarityFunc()));
+    }
+
+    protected Function<Param, Double> normalizationRange() {
+        return param -> Optional.ofNullable(param.getNormRange()).orElse(100D);
+    }
+
+    protected Function<Param, BiFunction<Double, double[], double[]>> normalizationCalc() {
+        return param -> NormalizeFuncUtils.findNormalizeFunc(NormalizationEnum.valueOf(param.getNormalizationFunc()));
+    }
+
     @Override
     public Map<String, List<String>> doPredict(Param param, List<List<ScoreModel>> normalData) {
-        int topN = Optional.ofNullable(param.getTopN()).orElse(100);
-        int topSimilarity = Optional.ofNullable(param.getTopSimilarity()).orElse(20);
-        boolean selfDistinct = param.getSelfDistinct();
         Map<String, List<String>> map = new HashMap<>();
         List<ScoreModel> workList = Optional.ofNullable(normalData).orElse(new ArrayList<>())
                 .stream().flatMap(Collection::stream).collect(Collectors.toList());
@@ -82,159 +114,179 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
             return map;
         }
 
+        long start = System.nanoTime();
+
+        // sort the normal list by score, so that we don't need to sort the item list for each user
         workList.sort((s1, s2) -> s2.getScore().compareTo(s1.getScore()));
 
         Executor executor = TaskPool.getExecutor();
+        CompletableFuture<ConcurrentHashMap<String, List<String>>> task = predictTask(param, workList, executor)
+                .whenCompleteAsync((predictMap, e) -> {
+                    log.info("Took [{}] to build the predict map with [{}] items"
+                            , (System.nanoTime() - start) / 1_000_000
+                            , CollectionUtils.isEmpty(predictMap) ? 0 : predictMap.size());
+                    if (Objects.nonNull(e)) {
+                        log.error("Got error:[{}]", e);
+                    }
+                });
+
+        return task.join();
+    }
+
+    protected CompletableFuture<ConcurrentHashMap<String, List<String>>> predictTask(Param param, List<ScoreModel> workList, Executor executor) {
         return CompletableFuture.supplyAsync(() -> buildItemsIdx(workList), executor)
-                .thenApplyAsync(itemsIdx -> buildPredictMap(topN, itemsIdx, workList), executor)
-                .thenApplyAsync(pair -> CompletableFuture.supplyAsync(() -> normalizeMetrics(pair.getKey()), executor)
-                        .thenApplyAsync(metrics -> buildSimilarityMap(topSimilarity, metrics), executor)
-                        .thenApplyAsync(this::buildScaleMap, executor)
+                .thenApplyAsync(itemsIdx -> buildPredictMap(param, itemsIdx, workList), executor)
+                .thenApplyAsync(pair -> CompletableFuture.supplyAsync(() -> normalizeMatrices(param, pair.getKey()), executor)
+                        .thenApplyAsync(matrices -> buildSimilarityMap(param, matrices), executor)
                         .thenCombineAsync(CompletableFuture.supplyAsync(pair::getValue, executor)
-                                , (scaleMap, items) -> buildItemToUsersMap(topN, selfDistinct, scaleMap, items)))
-                .join()
+                                , (scaleMap, itemsToUser) -> buildItemToUsersMap(param, scaleMap, itemsToUser)))
                 .join();
     }
 
-    private ConcurrentHashMap<String, List<String>> buildItemToUsersMap(int topN
-                                                                        , boolean selfDistinct
+    /**
+     * build recommend map for each user, based on users' similarity map and item idx map
+     *
+     * @param param
+     * @param scaleMap
+     * @param userItems
+     * @return
+     */
+    protected ConcurrentHashMap<String, List<String>> buildItemToUsersMap(Param param
             , ConcurrentHashMap<String, List<MutablePair<String, Double>>> scaleMap
-            , ConcurrentHashMap<String, List<String>> items) {
+            , ConcurrentHashMap<String, List<String>> userItems) {
         long start = System.nanoTime();
+
+        int topN = topNItem().apply(param);
+        boolean selfDistinct = selfDistinct().apply(param);
+        int workParallelism = workParallel().apply(param);
+
         ConcurrentHashMap<String, List<String>> map = new ConcurrentHashMap<>();
-        ForkJoinPool forkJoinPool = new ForkJoinPool(20);
+        ForkJoinPool forkJoinPool = new ForkJoinPool(workParallelism);
         forkJoinPool.submit(() ->
                 scaleMap.entrySet().parallelStream().forEach(e -> {
-                    String userId = e.getKey();
-                    List<MutablePair<String, Double>> scaleToUser = e.getValue();
+                    String id = e.getKey();
+                    List<MutablePair<String, Double>> similarToId = e.getValue();
 
-                    log.debug("Sim info: uid:[{}], others:\n{}"
-                            , userId
-                            , scaleToUser.stream()
+                    log.debug("Sim info: id:[{}], others:\n{}"
+                            , id
+                            , similarToId.stream()
                                     .map(pair -> String.format("\t%s-%s", pair.getKey(), pair.getValue()))
                                     .collect(Collectors.joining("\n")));
 
-                    List<String> currItems = items.get(userId);
-                    double sum = scaleToUser.stream().map(MutablePair::getRight).mapToDouble(Double::doubleValue).sum();
+                    Set<String> currItems = new HashSet<>(userItems.get(id));
+                    List<Double> scaledScores = similarToId.stream().map(MutablePair::getRight).collect(Collectors.toList());
+                    MutablePair<Integer, Double> sumCount = CommonFuncUtils.sumCount(scaledScores);
+                    double sum = 0 == sumCount.getValue() ? 1 : sumCount.getValue();
 
                     Set<String> distinct = ConcurrentHashMap.newKeySet();
-                    List<String> list = scaleToUser.stream().map(pair -> {
-                        String similarUserId = pair.getLeft();
-                        List<String> userItems = items.get(similarUserId);
-                        int limit = Double.valueOf(topN * (pair.getValue() / sum)).intValue();
-                        return userItems.stream()
-                                .filter(distinct::add)
-                                .filter(item -> !selfDistinct || !currItems.contains(item))
-                                .limit(limit)
-                                .collect(Collectors.toList());
-                    }).flatMap(Collection::stream).collect(Collectors.toList());
-                    map.put(userId, list);
+                    List<String> recommendList = new ArrayList<>();
+                    similarToId.forEach(pair -> {
+                        String similarId = pair.getKey();
+                        Double similarScore = pair.getValue();
+                        int limit = Double.valueOf(topN * (similarScore / sum)).intValue();
+                        Optional.ofNullable(userItems.get(similarId))
+                                .ifPresent(itemForIdList ->
+                                        itemForIdList.stream()
+                                                .filter(distinct::add)
+                                                .filter(item -> !selfDistinct || currItems.add(item))
+                                                .limit(limit)
+                                                .forEach(recommendList::add));
+                    });
+                    map.put(id, recommendList);
                 })
         ).join();
         log.info("Took [{}] to build a [{}] itemsToUserMap", (System.nanoTime() - start) / 1_000_000, map.size());
         return map;
     }
 
-    private Double buildRescaleScore(Double rate, Double score, Double min, Double delta) {
-        return rate * (score - min) / delta;
-    }
-
-    private MutablePair<Double, Double> maxMinItemFinder(List<Double> items) {
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-        for (Double item : items) {
-            min = min > item ? item : min;
-            max = max < item ? item : max;
-        }
-        return MutablePair.of(min, max);
-    }
-
-    private List<MutablePair<String, Double>> rescale(Double rate, List<MutablePair<String, Double>> list) {
-        Double rateD = Optional.ofNullable(rate).orElse(1D);
-        List<Double> items = list.stream().map(MutablePair::getRight).collect(Collectors.toList());
-
-        MutablePair<Double, Double> minMax = maxMinItemFinder(items);
-        Double min = minMax.getLeft();
-        Double max = minMax.getRight();
-        double delta = (max.equals(min)) ? 1 : max - min;
-
-        return list.parallelStream()
-                .map(pair -> MutablePair.of(pair.getLeft(), buildRescaleScore(rateD, pair.getRight(), min, delta)))
-                .collect(Collectors.toList());
-    }
-
-    private ConcurrentHashMap<String, List<MutablePair<String, Double>>> buildScaleMap(ConcurrentHashMap<String, List<MutablePair<String, Double>>> similarityMap) {
+    protected ConcurrentHashMap<String, List<MutablePair<String, Double>>> buildScaleMap(Param param
+            , ConcurrentHashMap<String, List<MutablePair<String, Double>>> scoresMapping) {
         long start = System.nanoTime();
+
+        BiFunction<Double, double[], double[]> normalizationFormula = normalizationCalc().apply(param);
+        Double normalizationRange = normalizationRange().apply(param);
+        int workParallelism = workParallel().apply(param);
+
         ConcurrentHashMap<String, List<MutablePair<String, Double>>> map = new ConcurrentHashMap<>();
-        ForkJoinPool forkJoinPool = new ForkJoinPool(20);
+        ForkJoinPool forkJoinPool = new ForkJoinPool(workParallelism);
         forkJoinPool.submit(() ->
-                similarityMap.entrySet().parallelStream()
-                        .map(e -> MutablePair.of(e.getKey(), rescale(100D, e.getValue())))
-                        .forEach(pair -> map.put(pair.getKey(), pair.getValue()))
+                scoresMapping.entrySet().parallelStream()
+                        .forEach(e -> {
+                            List<MutablePair<String, Double>> similarityMappingList = e.getValue();
+                            int size = similarityMappingList.size();
+                            List<MutablePair<String, Double>> rescaledMappingList = new ArrayList<>(size);
+                            List<Double> simScore = similarityMappingList.stream().map(MutablePair::getRight).collect(Collectors.toList());
+                            double[] scoreArr = CommonFuncUtils.doubleListToArray(simScore);
+                            double[] rescaleScoreArr = normalizationFormula.apply(normalizationRange, scoreArr);
+
+                            int idx = 0;
+                            DataUtils.forEach(idx, similarityMappingList, (i, pair) -> rescaledMappingList.add(MutablePair.of(pair.getKey(), rescaleScoreArr[i])));
+                            map.put(e.getKey(), rescaledMappingList);
+                        })
         ).join();
         log.info("Took [{}] to build a [{}] scaleMap", (System.nanoTime() - start) / 1_000_000, map.size());
         return map;
     }
 
-    private ConcurrentHashMap<String, List<MutablePair<String, Double>>> buildSimilarityMap(int topSimilarity
-            , ConcurrentHashMap<String, double[]> metrics) {
+    /**
+     * build the similarity map among users' matrices
+     *
+     * @param param
+     * @param matrices
+     * @return
+     */
+    protected ConcurrentHashMap<String, List<MutablePair<String, Double>>> buildSimilarityMap(Param param
+            , ConcurrentHashMap<String, double[]> matrices) {
         long start = System.nanoTime();
+        int topSimilarity = topNSimilar().apply(param);
+        BiFunction<double[], double[], Double> similarityCalc = similarityCalc().apply(param);
+        int workParallelism = workParallel().apply(param);
+
         ConcurrentHashMap<String, List<MutablePair<String, Double>>> map = new ConcurrentHashMap<>();
-        ForkJoinPool forkJoinPool = new ForkJoinPool(20);
+        ForkJoinPool forkJoinPool = new ForkJoinPool(workParallelism);
         forkJoinPool.submit(() ->
-                metrics.entrySet().parallelStream().forEach(e -> {
-                    String userId = e.getKey();
-                    double[] userMetric = e.getValue();
-                    List<MutablePair<String, Double>> list = metrics.entrySet().stream()
-                            .filter(se -> !userId.equalsIgnoreCase(se.getKey()))
-                            .map(se -> MutablePair.of(se.getKey(), similarity(userMetric, se.getValue())))
+                matrices.entrySet().parallelStream().forEach(e -> {
+                    String id = e.getKey();
+                    double[] matrix = e.getValue();
+                    List<MutablePair<String, Double>> list = matrices.entrySet().stream()
+                            .filter(se -> !id.equalsIgnoreCase(se.getKey()))
+                            .map(se -> MutablePair.of(se.getKey(), similarityCalc.apply(matrix, se.getValue())))
                             .sorted((p1, p2) -> p2.getValue().compareTo(p1.getValue()))
                             .limit(topSimilarity)
                             .collect(Collectors.toList());
-                    log.debug("Most similar: [{}]:\n [{}]", userId, list.stream().map(MutablePair::getLeft).collect(Collectors.joining(",")));
-                    map.put(userId, list);
+                    log.debug("Most similar vector for id: [{}]:\n [{}]", id, list.stream().map(MutablePair::getLeft).collect(Collectors.joining(",")));
+                    map.put(id, list);
                 })).join();
         log.info("Took [{}] to build a [{}] similarityMap", (System.nanoTime() - start) / 1_000_000, map.size());
         return map;
     }
 
-    private ConcurrentHashMap<String, double[]> normalizeMetrics(ConcurrentHashMap<String, double[]> oriMetrics) {
+    /**
+     * normalize the matrices, in case user scores too discrete
+     *
+     * @param param
+     * @param oriMatrices
+     * @return
+     */
+    protected ConcurrentHashMap<String, double[]> normalizeMatrices(Param param, ConcurrentHashMap<String, double[]> oriMatrices) {
         long start = System.nanoTime();
-        ConcurrentHashMap<String, double[]> map = new ConcurrentHashMap<>(oriMetrics.size());
-        oriMetrics.entrySet().parallelStream().forEach(e -> {
-            List<Double> scores = DoubleStream.of(e.getValue()).boxed().collect(Collectors.toList());
-            int size = scores.size();
-            MutablePair<Double, Double> minMax = maxMinItemFinder(scores);
-            Double min = minMax.getLeft();
-            Double max = minMax.getRight();
-            double delta = (max.equals(min)) ? 1 : max - min;
-
-            double[] outscore = new double[size];
-            for (int i = 0; i < size; i ++) {
-                outscore[i] = buildRescaleScore(100D, scores.get(i), min,delta);
-            }
-            map.put(e.getKey(), outscore);
-        });
-        log.info("Took [{}] to normalize user metric", (System.nanoTime() - start) / 1_000_000);
+        BiFunction<Double, double[], double[]> normalizationFormula = normalizationCalc().apply(param);
+        Double normalizationRange = normalizationRange().apply(param);
+        ConcurrentHashMap<String, double[]> map = new ConcurrentHashMap<>(oriMatrices.size());
+        oriMatrices.entrySet().parallelStream()
+                .forEach(e -> map.put(e.getKey(), normalizationFormula.apply(normalizationRange, e.getValue())));
+        log.info("Took [{}] to normalize matrices", (System.nanoTime() - start) / 1_000_000);
 
         return map;
     }
 
-    private double similarity(double[] vector1, double[] vector2) {
-        if (vector1.length != vector2.length) {
-            return 0D;
-        }
-
-        double sum = 0D;
-        int size = vector1.length;
-        for (int i = 0; i < size; i++) {
-            sum += Math.pow((vector1[i] - vector2[i]), 2);
-        }
-
-        return Math.sqrt(sum);
-    }
-
-    private ConcurrentHashMap<String, Integer> buildItemsIdx(List<ScoreModel> normalData) {
+    /**
+     * build item idx mapping based on normal data
+     *
+     * @param normalData
+     * @return
+     */
+    protected ConcurrentHashMap<String, Integer> buildItemsIdx(List<ScoreModel> normalData) {
         long start = System.nanoTime();
         AtomicInteger counter = new AtomicInteger(0);
         ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
@@ -247,12 +299,21 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
         return map;
     }
 
-    private MutablePair<ConcurrentHashMap<String, double[]>, ConcurrentHashMap<String, List<String>>> buildPredictMap(int topN
+    /**
+     * build userMatrices and item against user map
+     *
+     * @param param
+     * @param itemsIdx
+     * @param normalData
+     * @return
+     */
+    protected MutablePair<ConcurrentHashMap<String, double[]>, ConcurrentHashMap<String, List<String>>> buildPredictMap(Param param
             , ConcurrentHashMap<String, Integer> itemsIdx, List<ScoreModel> normalData) {
         long start = System.nanoTime();
 
+        int topN = topNItem().apply(param);
         int itemsCount = itemsIdx.size();
-        ConcurrentHashMap<String, double[]> userMetrics = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, double[]> userMatrices = new ConcurrentHashMap<>();
         ConcurrentHashMap<String, List<String>> userItems = new ConcurrentHashMap<>();
 
         normalData.stream()
@@ -263,8 +324,8 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
                     Integer itemIdx = itemsIdx.get(itemId);
                     Double score = scoreModel.getScore();
 
-                    userMetrics.putIfAbsent(userId, new double[itemsCount]);
-                    userMetrics.get(userId)[itemIdx] = score;
+                    userMatrices.putIfAbsent(userId, new double[itemsCount]);
+                    userMatrices.get(userId)[itemIdx] = score;
                 })
                 .forEach(scoreModel -> {
                     String userId = scoreModel.getUserId();
@@ -276,8 +337,8 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
                     }
                 });
 
-        log.info("Took [{}] to build a [{}] userMetricsMap and a [{}] userItemsMap", (System.nanoTime() - start) / 1_000_000, userMetrics.size(), userItems.size());
-        return MutablePair.of(userMetrics, userItems);
+        log.info("Took [{}] to build a [{}] userMetricsMap and a [{}] userItemsMap", (System.nanoTime() - start) / 1_000_000, userMatrices.size(), userItems.size());
+        return MutablePair.of(userMatrices, userItems);
     }
 
     @PostConstruct
