@@ -23,6 +23,8 @@ public class NormalizeFuncUtils {
                 return NormalizeFuncUtils::maxMinRangeRescale;
             case Z_SCORE:
                 return NormalizeFuncUtils::zScore;
+            case PERCENT_IN_ALL:
+                return NormalizeFuncUtils::percentInAll;
             case MODE_DISTANCE:
             default:
                 return NormalizeFuncUtils::modeDistance;
@@ -82,6 +84,20 @@ public class NormalizeFuncUtils {
         return result;
     }
 
+    private static double[] percentInAll(double range, double[] doubleArray) {
+        List<Double> items = CommonFuncUtils.doubleArrayToList(doubleArray);
+        MutablePair<Integer, Double> sumCount = CommonFuncUtils.sumCount(items);
+        int size = sumCount.getKey();
+        double sum = sumCount.getValue();
+
+        double[] result = new double[size];
+        for (int i = 0; i < size; i++) {
+            result[i] = items.get(i) / sum;
+        }
+
+        return result;
+    }
+
     public static double[] maxMinRangeRescale(double range, double[] doubleArray) {
         List<Double> items = CommonFuncUtils.doubleArrayToList(doubleArray);
         int size = items.size();
@@ -92,8 +108,8 @@ public class NormalizeFuncUtils {
         double delta = (max.equals(min)) ? 1 : max - min;
 
         double[] result = new double[size];
-        for (int i = 0; i < size; i ++) {
-            result[i] = buildRescaleScore(range, items.get(i), min,delta);
+        for (int i = 0; i < size; i++) {
+            result[i] = buildRescaleScore(range, items.get(i), min, delta);
         }
 
         return result;
