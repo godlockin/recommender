@@ -61,7 +61,7 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
         }
 
         log.info("Got {} normalized data", normalData.size());
-        Map<String, List<String>> predictResult = Optional.ofNullable(dataPredictorMap.get(algorithm))
+        Map<String, List<String>> predictResult = (Map<String, List<String>>) Optional.ofNullable(dataPredictorMap.get(algorithm))
                 .filter(service -> service instanceof AlsPredictServiceImpl)
                 .flatMap(service -> Optional.ofNullable(((AlsPredictServiceImpl) service)
                         .doPredict(param, normalData))).orElse(new HashMap<>());

@@ -88,16 +88,19 @@ public class LabelBasePredictServiceImpl extends AbstractPredictServiceImpl impl
     }
 
     protected CompletableFuture<ConcurrentHashMap<String, List<String>>> predictTask(Param param, Map<Class, List> normalData, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> buildSeedMatrices(normalData.get(SeedProfile.class)), executor)
-                .thenCombineAsync(CompletableFuture.supplyAsync(() -> buildItemMatrices(normalData.get(ItemLabelsGenerator.class)), executor)
+        return CompletableFuture.supplyAsync(() -> (Map<String, List<MutablePair<Long, Long>>>) buildSeedMatrices(normalData.get(SeedProfile.class)), executor)
+                .thenCombineAsync(CompletableFuture.supplyAsync(() -> (Map<Long, double[]>) buildItemMatrices(normalData.get(ItemLabelsGenerator.class)), executor)
                         , (seedMap, itemMatrixMap) -> predictForItem(seedMap, itemMatrixMap, param));
     }
 
     protected ConcurrentHashMap<String, List<String>> predictForItem(
-            Map<String, List<MutablePair<Long, Long>>> seedMap
-            , Map<Long, double[]> itemMatrixMap
+            Object seed
+            , Object items
             , Param param) {
         long start = System.nanoTime();
+
+        Map<String, List<MutablePair<Long, Long>>> seedMap = (Map<String, List<MutablePair<Long, Long>>>) seed;
+        Map<Long, double[]> itemMatrixMap = (Map<Long, double[]>) items;
 
         ConcurrentHashMap<String, List<String>> map = new ConcurrentHashMap<>();
         List<String> seedList = Optional.ofNullable(param.getSeedList()).orElse(new ArrayList<>());
