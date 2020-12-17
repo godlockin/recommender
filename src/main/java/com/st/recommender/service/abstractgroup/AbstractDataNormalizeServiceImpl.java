@@ -6,16 +6,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 public abstract class AbstractDataNormalizeServiceImpl<T, R> extends AbstractDataProcessorImpl implements DataNormalizeService<T, R> {
 
-    public List<R> normalize(Param param, List<T> list) {
-        return (List<R>) dataNormalizer().apply(param, (T) list);
+    public <T, R> R normalize(Param param, T t) {
+        return (R) dataNormalizer().apply(param, t);
     }
 
-    protected abstract BiFunction<Param, T, R> dataNormalizer();
+    protected abstract BiFunction<Param, Object, R> dataNormalizer();
 
 }

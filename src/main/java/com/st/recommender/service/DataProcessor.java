@@ -4,5 +4,8 @@ import com.st.recommender.constants.BaseEnum;
 
 public interface DataProcessor {
     BaseEnum algorithm();
-    default String processorName() { return getClass().getSimpleName(); }
+
+    default String processorName() {
+        return getClass().getSimpleName();
+    }
 }

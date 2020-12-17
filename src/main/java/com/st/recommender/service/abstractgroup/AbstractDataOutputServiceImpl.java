@@ -17,7 +17,7 @@ public abstract class AbstractDataOutputServiceImpl extends AbstractDataProcesso
         Param funcParam = configConverter().apply(param);
         String filePath = filePathConverter().apply(param);
         Object workData = dataConverter().apply(data);
-        
+
         return doWriteFile(filePath, funcParam, workData);
     }
 

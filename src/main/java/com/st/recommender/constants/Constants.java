@@ -6,9 +6,8 @@ import java.util.Map;
 public class Constants {
 
     public static class AlgorithmMapping {
-        private AlgorithmMapping() {}
-
         public static Map<BaseEnum, BaseEnum> MAPPING = new HashMap<>();
+
         static {
             // als
             // user base
@@ -17,6 +16,12 @@ public class Constants {
 
             // item base
             MAPPING.put(AlgorithmEnum.LEAF_TO_ANCHOR_CATEGORY, AlgorithmEnum.ALS);
+
+            // label base
+            MAPPING.put(AlgorithmEnum.LABEL_SIMPLE_SIM, AlgorithmEnum.LABEL_BASE);
+        }
+
+        private AlgorithmMapping() {
         }
     }
 }

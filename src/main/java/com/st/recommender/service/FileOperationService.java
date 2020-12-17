@@ -14,6 +14,8 @@ public interface FileOperationService {
 
     JSONArray loadFileAsCamelJson(String path);
 
+    Map<Class, List> loadFileAsJson(Map<String, String> pathMap, Map<String, Class> clazzMap);
+
     <T> List<T> loadFileAsPojo(String path, Class<T> clazz);
 
     Map<Class, List> loadFileAsPojo(Map<String, String> pathMap, Map<String, Class> clazzMap);

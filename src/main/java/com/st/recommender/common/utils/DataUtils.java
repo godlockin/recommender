@@ -13,11 +13,11 @@ import java.util.stream.StreamSupport;
 @Slf4j
 public class DataUtils {
 
-    public static boolean isAllCollectionsEmpty(Collection...collections) {
+    public static boolean isAllCollectionsEmpty(Collection... collections) {
         return isAllCollectionMatch(Stream.of(collections), CollectionUtils::isEmpty);
     }
 
-    public static boolean isAnyCollectionEmpty(Collection...collections) {
+    public static boolean isAnyCollectionEmpty(Collection... collections) {
         return isAnyCollectionMatch(Stream.of(collections), CollectionUtils::isEmpty);
     }
 

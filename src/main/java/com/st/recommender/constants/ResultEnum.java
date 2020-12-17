@@ -2,11 +2,7 @@ package com.st.recommender.constants;
 
 public enum ResultEnum implements BaseEnum {
 
-    SUCCESS(1, "成功")
-    , FAILURE(0, "失败")
-    , PARAMETER_CHECK(21, "参数校验失败")
-    , REMOTE_QUERY(31, "远程请求失败")
-    ;
+    SUCCESS(1, "成功"), FAILURE(0, "失败"), PARAMETER_CHECK(21, "参数校验失败"), REMOTE_QUERY(31, "远程请求失败");
 
     private Integer code;
     private String message;
@@ -25,4 +21,5 @@ public enum ResultEnum implements BaseEnum {
     public String getMessage() {
         return this.message;
     }
+
 }

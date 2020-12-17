@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class FileOperationServiceImpl implements FileOperationService {
 
     @Value("${DEFAULT_OUT_ITEM_LINE_DELIMITER:\n}")
-    private String ITEM_LINE_DELIMITER;
+    private String ITEM_LINE_DELIMITER = "\n";
 
     @Override
     public List<String> loadFile(String path) {
@@ -59,8 +59,19 @@ public class FileOperationServiceImpl implements FileOperationService {
             return oriJson;
         }
 
+        log.info("Loaded {} json data lines from:[{}]", oriJson.size(), path);
         JSONArray camelJson = handleJSONArray(oriJson);
         return CollectionUtils.isEmpty(camelJson) ? oriJson : camelJson;
+    }
+
+    @Override
+    public Map<Class, List> loadFileAsJson(Map<String, String> pathMap, Map<String, Class> clazzMap) {
+        return pathMap.entrySet().parallelStream()
+                .filter(e -> clazzMap.containsKey(e.getKey()))
+                .map(e -> MutablePair.of(clazzMap.get(e.getKey()), e.getValue()))
+                .map(pair -> MutablePair.of(pair.getKey(), loadFileAsCamelJson(pair.getValue())))
+                .filter(pair -> !CollectionUtils.isEmpty(pair.getValue()))
+                .collect(Collectors.toMap(MutablePair::getKey, MutablePair::getValue));
     }
 
     @Override
@@ -107,6 +118,7 @@ public class FileOperationServiceImpl implements FileOperationService {
             return result;
         }
 
+        log.info("Loaded {} csv data lines from:[{}]", contents.size(), path);
         String firstLine = contents.get(0);
         if (CollectionUtils.isEmpty(header)) {
             if (contents.size() <= 1) {
@@ -123,7 +135,7 @@ public class FileOperationServiceImpl implements FileOperationService {
                 .map(list -> {
                     Map<String, String> dataLine = new HashMap<>();
                     int size = list.size();
-                    for (int i = 0; i < size; i ++) {
+                    for (int i = 0; i < size; i++) {
                         if (i > columnNum - 1) {
                             break;
                         }

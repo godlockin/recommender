@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -12,15 +13,19 @@ import java.util.Map;
 @AllArgsConstructor
 public class Param {
     protected AlgorithmEnum algorithm;
-    private Map<String, String> inputFilePath;
-    private String outputFilePath;
+    protected Double normRange = 100D;
+    protected Map<String, String> inputFilePath;
+    protected String outputFilePath;
 
     private Integer parallel = 20;
-
+    private Integer topN = 100;
     private String similarityFunc = "EUCLIDEAN_DISTANCE";
     private String normalizationFunc = "MAX_MIN_RANGE";
-    protected Double normRange = 100D;
-    private Boolean selfDistinct = true;
-    private Integer topN = 100;
     private Integer topSimilarity = 20;
+
+    // als
+    private Boolean selfDistinct = true;
+
+    // label base
+    private List<String> seedList;
 }

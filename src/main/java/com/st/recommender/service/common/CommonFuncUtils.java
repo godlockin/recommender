@@ -1,6 +1,5 @@
 package com.st.recommender.service.common;
 
-import com.st.recommender.common.utils.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.stereotype.Component;
@@ -27,6 +26,7 @@ public class CommonFuncUtils {
 
         return streamToT(items, doublePicker, stream -> stream.collect(Collectors.toList())).getValue();
     }
+
     public static double[] doubleListToArray(List<Double> doubleList) {
         return itemsToDoubleArray(doubleList, Double::doubleValue);
     }
@@ -61,9 +61,13 @@ public class CommonFuncUtils {
         return streamToT(items, Double::doubleValue, stream -> stream.mapToDouble(x -> x).sum());
     }
 
-    public static Boolean scoreFilter(Double score) { return Objects.nonNull(score) && !(score.isNaN() || score.isInfinite()); }
+    public static Boolean scoreFilter(Double score) {
+        return Objects.nonNull(score) && !(score.isNaN() || score.isInfinite());
+    }
 
-    public static double modeDistance(List<Double> items) { return Math.sqrt(squaresSum(items)); }
+    public static double modeDistance(List<Double> items) {
+        return Math.sqrt(squaresSum(items));
+    }
 
     public static double squaresSum(List<Double> items) {
         return streamToT(items, Double::doubleValue, stream -> stream.mapToDouble(x -> Math.pow(x, 2)).sum()).getValue();

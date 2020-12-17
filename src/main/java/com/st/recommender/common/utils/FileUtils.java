@@ -16,14 +16,16 @@ import java.util.Objects;
 public class FileUtils {
 
     public static List<String> loadFile(String path) {
+        List<String> fileLines = new ArrayList<>();
         File file = new File(path);
 
         if (!file.exists() || file.isDirectory()) {
             log.error("Illegal file for path:[{}]", path);
+            return fileLines;
         }
 
-        List<String> fileLines = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            log.info("Try to load data from:[{}]", path);
             reader.lines()
                     .filter(Objects::nonNull)
                     .filter(StringUtils::isNotBlank)

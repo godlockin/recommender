@@ -2,12 +2,7 @@ package com.st.recommender.constants;
 
 public enum AlgorithmEnum implements BaseEnum {
 
-    BASE(0, "BASE")
-    , ALS(1, "ALS")
-    , ANCHOR_TO_LEAF_CATEGORY(11, "AtLC")
-    , SINGLE_ANCHOR_TO_LEAF_CATEGORY(12, "SAtLC")
-    , LEAF_TO_ANCHOR_CATEGORY(12, "LtAC")
-    ;
+    BASE(0, "BASE"), ALS(1, "ALS"), ANCHOR_TO_LEAF_CATEGORY(11, "AtLC"), SINGLE_ANCHOR_TO_LEAF_CATEGORY(12, "SAtLC"), LEAF_TO_ANCHOR_CATEGORY(12, "LtAC"), LABEL_BASE(2, "LB"), LABEL_SIMPLE_SIM(21, "LSS");
 
     private Integer code;
     private String message;

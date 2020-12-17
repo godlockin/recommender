@@ -22,17 +22,6 @@ public class DateUtils {
     public static final String DEFAULT_DATE_FORMAT = DATE_YYYYMMDD_HHMMSS;
     public static final String DEFAULT_ZONE_ID = "Asia/Shanghai";
     public static final DateTimeFormatter DEFAULT_TIME_FORMATTER = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
-
-    public enum DATE_TYPE {
-        YEAR
-        , MONTH
-        , WEEK
-        , DAY
-        , HOUR
-        , MINUTE
-        , SECOND
-    }
-
     private static final Map<DATE_TYPE, BiFunction<ZonedDateTime, Integer, ZonedDateTime>> functionMap = new HashMap() {{
         put(DATE_TYPE.YEAR, addYears());
         put(DATE_TYPE.MONTH, addMonths());
@@ -173,5 +162,9 @@ public class DateUtils {
         dateStr = StringUtils.isBlank(dateStr) ? "2000-01-01 00:00:00" : dateStr;
         dateStr = 10 == dateStr.length() ? dateStr + " 00:00:00" : dateStr;
         return parseDate(dateStr);
+    }
+
+    public enum DATE_TYPE {
+        YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND
     }
 }
