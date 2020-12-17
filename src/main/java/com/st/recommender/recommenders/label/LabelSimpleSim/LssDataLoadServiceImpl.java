@@ -88,7 +88,7 @@ public class LssDataLoadServiceImpl extends AbstractDataLoadServiceImpl implemen
                 .leafCategory(map.getOrDefault("tao_leaf_category_id", ""))
                 .count(Optional.ofNullable(map.get("after_speak_sale"))
                         .filter(str -> StringUtils.isNoneBlank(str) && !"\"\"".equalsIgnoreCase(str))
-                        .flatMap(str -> Optional.of(Long.parseLong(str))).orElse(0L))
+                        .flatMap(str -> Optional.of(Long.parseLong(str))).orElse(1L))
                 .build();
     }
 
