@@ -26,7 +26,7 @@ import javax.sql.DataSource;
 )
 public class DyMybatisConfig extends MybatisConfig {
 
-    @Value("${DB_URL_DY:161.189.13.179}")
+    @Value("${DB_URL_DY:}")
     private String DB_URL;
     @Value("${DB_PORT_DY:3306}")
     private Integer DB_PORT;
@@ -34,7 +34,7 @@ public class DyMybatisConfig extends MybatisConfig {
     private String DB_COLLECTION;
     @Value("${DB_USER_DY:root}")
     private String DB_USER;
-    @Value("${DB_PASSWORD_DY:P8feEp*+uw.@e}")
+    @Value("${DB_PASSWORD_DY:}")
     private String DB_PWD;
     private String mapperPath = "classpath*:mapper/dy/*.xml";
 
