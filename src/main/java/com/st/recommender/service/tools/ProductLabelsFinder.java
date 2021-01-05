@@ -2,7 +2,7 @@ package com.st.recommender.service.tools;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.st.recommender.model.opt.labelbase.ItemLabelsGenerator;
+import com.st.recommender.model.opt.labelbase.ItemSingleLabelsMatrix;
 import com.st.recommender.model.opt.labelbase.LabelGenerator;
 import com.st.recommender.service.FileOperationService;
 import com.st.recommender.service.impl.FileOperationServiceImpl;
@@ -56,7 +56,7 @@ public class ProductLabelsFinder {
         int labelSize = idx.size();
 
         itemMatrices.forEach((itemId, itemMatrix) -> {
-            ItemLabelsGenerator ilg = new ItemLabelsGenerator(itemId, labelSize);
+            ItemSingleLabelsMatrix ilg = new ItemSingleLabelsMatrix(itemId, labelSize);
             itemMatrix.forEach((labelId, labelCount) -> ilg.getMatrix()[labelId] = labelCount);
         });
 

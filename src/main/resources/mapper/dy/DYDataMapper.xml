@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.st.recommender.db.mapper.dy.DYDataMapper">
+  <resultMap id="BaseResultMap" type="com.st.recommender.db.entity.dy.DYData">
+    <result column="follower_count" jdbcType="INTEGER" property="followerCount" />
+    <result column="live_hour" jdbcType="INTEGER" property="liveHour" />
+    <result column="user_peak" jdbcType="INTEGER" property="userPeak" />
+    <result column="gift_uv_count" jdbcType="INTEGER" property="giftUvCount" />
+    <result column="room_ticket_count" jdbcType="INTEGER" property="roomTicketCount" />
+    <result column="total_user" jdbcType="INTEGER" property="totalUser" />
+    <result column="product_count" jdbcType="INTEGER" property="productCount" />
+    <result column="item_amount" jdbcType="DOUBLE" property="itemAmount" />
+    <result column="item_volume" jdbcType="INTEGER" property="itemVolume" />
+    <result column="final_price" jdbcType="DOUBLE" property="finalPrice" />
+    <result column="commission_rate" jdbcType="INTEGER" property="commissionRate" />
+    <result column="shelf_times" jdbcType="BIGINT" property="shelfTimes" />
+    <result column="item_top1_gender" jdbcType="INTEGER" property="itemTop1Gender" />
+    <result column="item_top2_gender" jdbcType="INTEGER" property="itemTop2Gender" />
+    <result column="item_top1_age" jdbcType="VARCHAR" property="itemTop1Age" />
+    <result column="item_top2_age" jdbcType="VARCHAR" property="itemTop2Age" />
+    <result column="item_top3_age" jdbcType="VARCHAR" property="itemTop3Age" />
+    <result column="top1_gender" jdbcType="INTEGER" property="top1Gender" />
+    <result column="top2_gender" jdbcType="INTEGER" property="top2Gender" />
+    <result column="city_rate" jdbcType="DOUBLE" property="cityRate" />
+    <result column="myfollow_rate" jdbcType="DOUBLE" property="myfollowRate" />
+    <result column="other_rate" jdbcType="DOUBLE" property="otherRate" />
+    <result column="video_rate" jdbcType="DOUBLE" property="videoRate" />
+    <result column="top1_age" jdbcType="VARCHAR" property="top1Age" />
+    <result column="top2_age" jdbcType="VARCHAR" property="top2Age" />
+    <result column="top3_age" jdbcType="VARCHAR" property="top3Age" />
+    <result column="max_item_volume" jdbcType="INTEGER" property="maxItemVolume" />
+    <result column="max_shelf_times" jdbcType="BIGINT" property="maxShelfTimes" />
+    <result column="label_tmp" jdbcType="DOUBLE" property="labelTmp" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.st.recommender.db.entity.dy.DYDataWithBLOBs">
+    <result column="product_id" jdbcType="LONGVARCHAR" property="productId" />
+    <result column="author_id" jdbcType="LONGVARCHAR" property="authorId" />
+    <result column="nickname" jdbcType="LONGVARCHAR" property="nickname" />
+    <result column="live_label" jdbcType="LONGVARCHAR" property="liveLabel" />
+    <result column="unique_id" jdbcType="LONGVARCHAR" property="uniqueId" />
+    <result column="author_tags" jdbcType="LONGVARCHAR" property="authorTags" />
+    <result column="product_title" jdbcType="LONGVARCHAR" property="productTitle" />
+    <result column="category" jdbcType="LONGVARCHAR" property="category" />
+    <result column="brand_name" jdbcType="LONGVARCHAR" property="brandName" />
+    <result column="v2_category_big" jdbcType="LONGVARCHAR" property="v2CategoryBig" />
+    <result column="v2_category_first" jdbcType="LONGVARCHAR" property="v2CategoryFirst" />
+    <result column="v2_category_second" jdbcType="LONGVARCHAR" property="v2CategorySecond" />
+    <result column="v2_category_third" jdbcType="LONGVARCHAR" property="v2CategoryThird" />
+    <result column="ext_info" jdbcType="LONGVARCHAR" property="extInfo" />
+    <result column="sub_title" jdbcType="LONGVARCHAR" property="subTitle" />
+    <result column="top1_category" jdbcType="LONGVARCHAR" property="top1Category" />
+    <result column="top2_category" jdbcType="LONGVARCHAR" property="top2Category" />
+    <result column="top3_category" jdbcType="LONGVARCHAR" property="top3Category" />
+    <result column="item_top1_province" jdbcType="LONGVARCHAR" property="itemTop1Province" />
+    <result column="item_top2_province" jdbcType="LONGVARCHAR" property="itemTop2Province" />
+    <result column="item_top3_province" jdbcType="LONGVARCHAR" property="itemTop3Province" />
+    <result column="top1_brand_name" jdbcType="LONGVARCHAR" property="top1BrandName" />
+    <result column="top2_brand_name" jdbcType="LONGVARCHAR" property="top2BrandName" />
+    <result column="top3_brand_name" jdbcType="LONGVARCHAR" property="top3BrandName" />
+    <result column="top1_v2_category_first" jdbcType="LONGVARCHAR" property="top1V2CategoryFirst" />
+    <result column="top2_v2_category_first" jdbcType="LONGVARCHAR" property="top2V2CategoryFirst" />
+    <result column="top3_v2_category_first" jdbcType="LONGVARCHAR" property="top3V2CategoryFirst" />
+    <result column="top1_v2_category_second" jdbcType="LONGVARCHAR" property="top1V2CategorySecond" />
+    <result column="top2_v2_category_second" jdbcType="LONGVARCHAR" property="top2V2CategorySecond" />
+    <result column="top3_v2_category_second" jdbcType="LONGVARCHAR" property="top3V2CategorySecond" />
+    <result column="top1_province" jdbcType="LONGVARCHAR" property="top1Province" />
+    <result column="top2_province" jdbcType="LONGVARCHAR" property="top2Province" />
+    <result column="top3_province" jdbcType="LONGVARCHAR" property="top3Province" />
+    <result column="label" jdbcType="LONGVARCHAR" property="label" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    follower_count, live_hour, user_peak, gift_uv_count, room_ticket_count, total_user, 
+    product_count, item_amount, item_volume, final_price, commission_rate, shelf_times, 
+    item_top1_gender, item_top2_gender, item_top1_age, item_top2_age, item_top3_age, 
+    top1_gender, top2_gender, city_rate, myfollow_rate, other_rate, video_rate, top1_age, 
+    top2_age, top3_age, max_item_volume, max_shelf_times, label_tmp
+  </sql>
+  <sql id="Blob_Column_List">
+    product_id, author_id, nickname, live_label, unique_id, author_tags, product_title, 
+    category, brand_name, v2_category_big, v2_category_first, v2_category_second, v2_category_third, 
+    ext_info, sub_title, top1_category, top2_category, top3_category, item_top1_province, 
+    item_top2_province, item_top3_province, top1_brand_name, top2_brand_name, top3_brand_name, 
+    top1_v2_category_first, top2_v2_category_first, top3_v2_category_first, top1_v2_category_second, 
+    top2_v2_category_second, top3_v2_category_second, top1_province, top2_province, top3_province, 
+    label
+  </sql>
+  <select id="selectByExampleWithBLOBs" parameterType="com.st.recommender.db.entity.dy.DYDataExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from dy_ai_data7
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="com.st.recommender.db.entity.dy.DYDataExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    'false' as QUERYID,
+    <include refid="Base_Column_List" />
+    from dy_ai_data7
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="countByExample" parameterType="com.st.recommender.db.entity.dy.DYDataExample" resultType="java.lang.Long">
+    select count(*) from dy_ai_data7
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+</mapper>

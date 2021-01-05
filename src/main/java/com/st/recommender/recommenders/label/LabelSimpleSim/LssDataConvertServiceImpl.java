@@ -6,7 +6,7 @@ import com.st.recommender.common.utils.DataUtils;
 import com.st.recommender.common.utils.TaskPool;
 import com.st.recommender.constants.AlgorithmEnum;
 import com.st.recommender.model.opt.labelbase.SeedProfile;
-import com.st.recommender.model.opt.labelbase.ItemLabelsGenerator;
+import com.st.recommender.model.opt.labelbase.ItemSingleLabelsMatrix;
 import com.st.recommender.model.opt.labelbase.LabelGenerator;
 import com.st.recommender.model.origin.AnchorLeafRaw;
 import com.st.recommender.service.DataConvertService;
@@ -43,7 +43,7 @@ public class LssDataConvertServiceImpl extends AbstractDataConvertServiceImpl<Ma
                     .thenCombineAsync(buildAnchorProfileTask(anchorLeaves, executor)
                             , (itemMatricesList, anchorProfiles) -> {
                                 Map<Class, List> tmp = new HashMap<>();
-                                tmp.put(ItemLabelsGenerator.class, itemMatricesList);
+                                tmp.put(ItemSingleLabelsMatrix.class, itemMatricesList);
                                 tmp.put(SeedProfile.class, anchorProfiles);
                                 return tmp;
                             })
@@ -68,9 +68,9 @@ public class LssDataConvertServiceImpl extends AbstractDataConvertServiceImpl<Ma
         }, executor);
     }
 
-    private CompletableFuture<List<ItemLabelsGenerator>> buildItemMatricesTask(JSONArray groupProps, Executor executor) {
+    private CompletableFuture<List<ItemSingleLabelsMatrix>> buildItemMatricesTask(JSONArray groupProps, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
-            List<ItemLabelsGenerator> itemMatricesList = new ArrayList<>();
+            List<ItemSingleLabelsMatrix> itemMatricesList = new ArrayList<>();
             List<String> banKeys = Arrays.asList("_id", "itemId");
             int lineSize = groupProps.size();
 
@@ -106,7 +106,7 @@ public class LssDataConvertServiceImpl extends AbstractDataConvertServiceImpl<Ma
             int labelSize = idx.size();
 
             itemMatrices.forEach((itemId, itemMatrix) -> {
-                ItemLabelsGenerator ilg = new ItemLabelsGenerator(itemId, labelSize);
+                ItemSingleLabelsMatrix ilg = new ItemSingleLabelsMatrix(itemId, labelSize);
                 itemMatrix.forEach((labelId, labelCount) -> ilg.getMatrix()[labelId] = labelCount);
                 itemMatricesList.add(ilg);
             });

@@ -55,10 +55,6 @@ public class AtLCAlsDataNormalizeServiceImpl extends AbstractDataNormalizeServic
         };
     }
 
-    protected Function<Param, NormalizationEnum> findNormalizationFunc() {
-        return param -> NormalizationEnum.GLOBAL_AVG;
-    }
-
     @Override
     public AlgorithmEnum algorithm() {
         return AlgorithmEnum.ANCHOR_TO_LEAF_CATEGORY;

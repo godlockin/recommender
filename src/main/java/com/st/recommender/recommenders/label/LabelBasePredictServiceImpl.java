@@ -5,7 +5,7 @@ import com.st.recommender.common.utils.TaskPool;
 import com.st.recommender.constants.AlgorithmEnum;
 import com.st.recommender.constants.BaseEnum;
 import com.st.recommender.model.input.Param;
-import com.st.recommender.model.opt.labelbase.ItemLabelsGenerator;
+import com.st.recommender.model.opt.labelbase.ItemSingleLabelsMatrix;
 import com.st.recommender.model.opt.labelbase.SeedProfile;
 import com.st.recommender.service.DataProcessor;
 import com.st.recommender.service.PredictService;
@@ -69,7 +69,7 @@ public class LabelBasePredictServiceImpl extends AbstractPredictServiceImpl impl
     public Map<String, List<String>> doPredict(Param param, Map<Class, List> normalData) {
         Map<String, List<String>> map = new HashMap<>();
         List<SeedProfile> seedProfiles = normalData.get(SeedProfile.class);
-        List<ItemLabelsGenerator> itemMatrices = normalData.get(ItemLabelsGenerator.class);
+        List<ItemSingleLabelsMatrix> itemMatrices = normalData.get(ItemSingleLabelsMatrix.class);
         if (DataUtils.isAnyCollectionEmpty(seedProfiles, itemMatrices)) {
             return map;
         }
@@ -89,7 +89,7 @@ public class LabelBasePredictServiceImpl extends AbstractPredictServiceImpl impl
 
     protected CompletableFuture<ConcurrentHashMap<String, List<String>>> predictTask(Param param, Map<Class, List> normalData, Executor executor) {
         return CompletableFuture.supplyAsync(() -> (Map<String, List<MutablePair<Long, Long>>>) buildSeedMatrices(normalData.get(SeedProfile.class)), executor)
-                .thenCombineAsync(CompletableFuture.supplyAsync(() -> (Map<Long, double[]>) buildItemMatrices(normalData.get(ItemLabelsGenerator.class)), executor)
+                .thenCombineAsync(CompletableFuture.supplyAsync(() -> (Map<Long, double[]>) buildItemMatrices(normalData.get(ItemSingleLabelsMatrix.class)), executor)
                         , (seedMap, itemMatrixMap) -> predictForItem(seedMap, itemMatrixMap, param));
     }
 
@@ -164,7 +164,7 @@ public class LabelBasePredictServiceImpl extends AbstractPredictServiceImpl impl
         return map;
     }
 
-    protected Map<Long, double[]> buildItemMatrices(List<ItemLabelsGenerator> itemMatrices) {
+    protected Map<Long, double[]> buildItemMatrices(List<ItemSingleLabelsMatrix> itemMatrices) {
         long start = System.nanoTime();
         Map<Long, double[]> map = itemMatrices.stream()
                 .map(matrix -> MutablePair.of(matrix.getIdx(), matrix.getMatrix()))

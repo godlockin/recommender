@@ -90,7 +90,7 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
         workList.sort((s1, s2) -> s2.getScore().compareTo(s1.getScore()));
 
         Executor executor = TaskPool.getExecutor();
-        CompletableFuture<ConcurrentHashMap<String, List<String>>> task = predictTask(param, workList, executor)
+        return predictTask(param, workList, executor)
                 .whenCompleteAsync((predictMap, e) -> {
                     log.info("Took [{}] to build the predict map with [{}] items"
                             , (System.nanoTime() - start) / 1_000_000
@@ -98,9 +98,7 @@ public abstract class AlsPredictServiceImpl extends AbstractPredictServiceImpl i
                     if (Objects.nonNull(e)) {
                         log.error("Got error:[{}]", e);
                     }
-                });
-
-        return task.join();
+                }, executor).join();
     }
 
     protected CompletableFuture<ConcurrentHashMap<String, List<String>>> predictTask(Param param, List<ScoreModel> workList, Executor executor) {

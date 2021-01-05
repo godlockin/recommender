@@ -1,4 +1,4 @@
-package com.st.recommender.recommenders.als.leafToAnchorCategory.singleAnchorToLeafCategory;
+package com.st.recommender.recommenders.als.leafToAnchorCategory;
 
 import com.st.recommender.constants.AlgorithmEnum;
 import com.st.recommender.constants.BaseEnum;

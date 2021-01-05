@@ -113,6 +113,7 @@ public class FileOperationServiceImpl implements FileOperationService {
         List<Object> result = new ArrayList<>();
         List<String> contents = loadFile(path).stream()
                 .filter(str -> str.contains(delimiter))
+                .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(contents)) {
             return result;

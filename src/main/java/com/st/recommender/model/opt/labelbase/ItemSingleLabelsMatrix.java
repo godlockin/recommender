@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemLabelsGenerator {
+public class ItemSingleLabelsMatrix {
     private long idx;
     private double[] matrix;
 
-    public ItemLabelsGenerator(long idx, int matrixSize) {
+    public ItemSingleLabelsMatrix(long idx, int matrixSize) {
         this.idx = idx;
         this.matrix = new double[matrixSize];
     }
