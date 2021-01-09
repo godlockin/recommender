@@ -93,6 +93,7 @@ local.properties
 
 .idea/**
 logs/
+data
 
 # User-specific stuff:
 .idea/**/workspace.xml
